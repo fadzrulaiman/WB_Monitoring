@@ -17,6 +17,7 @@ const SplitSO = () => {
   const [sortAsc, setSortAsc] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
   const [amending, setAmending] = useState(false);
+  const [vbeln1, setVbeln1] = useState(""); // Add state for vbeln_1
 
   // Converts 'MM/DD/YYYY' or 'DD/MM/YYYY' to 'YYYY-MM-DD'
   function toISODate(str) {
@@ -81,8 +82,8 @@ const SplitSO = () => {
     return sorted;
   }, [ticketDetail, sortKey, sortAsc]);
 
-  // Form validation
-  const validateForm = () => {
+  // Validation for search
+  const validateSearchForm = () => {
     if (!mwerks) {
       setError("MWERKS is required.");
       return false;
@@ -99,8 +100,31 @@ const SplitSO = () => {
     return true;
   };
 
+  // Validation for amend
+  const validateAmendForm = () => {
+    if (!mwerks) {
+      setError("MWERKS is required.");
+      return false;
+    }
+    if (!date) {
+      setError("WBDATE_IN is required.");
+      return false;
+    }
+    if (!wbTicket) {
+      setError("WB_TICKET is required.");
+      return false;
+    }
+    if (!vbeln1 || isNaN(Number(vbeln1))) {
+      setError("VBELN_1 is required and must be a number.");
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
   // Confirmation dialog
   const handleAmend = async () => {
+    if (!validateAmendForm()) return;
     const confirmed = window.confirm("Are you sure you want to amend to Single SO?");
     if (!confirmed) return;
 
@@ -112,6 +136,7 @@ const SplitSO = () => {
       await axios.post("/api/split-so/amend-single-so", {
         mwerks,
         wb_ticket: wbTicket,
+        vbeln_1: vbeln1, // Pass vbeln_1
       });
 
       setMessage("Splitting amended to single SO successfully.");
@@ -133,7 +158,7 @@ const SplitSO = () => {
   // Search for ticket detail
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateSearchForm()) return;
     setLoading(true);
     setMessage("");
     setError("");
@@ -275,22 +300,36 @@ const SplitSO = () => {
               </tbody>
             </table>
           </div>
-          <button
-            className="btn btn-success btn-icon"
-            style={{ marginTop: 16 }}
-            onClick={handleAmend}
-            disabled={loading || amending}
-            type="button"
-          >
-            <FaCheck className="icon" />
-            {amending ? (
-              <>
-                <span className="spinner" /> Amending...
-              </>
-            ) : (
-              "Amend to Single SO"
-            )}
-          </button>
+          <form className="search-form" onSubmit={e => { e.preventDefault(); handleAmend(); }} style={{ marginTop: 16 }}>
+            <label>
+              VBELN_1:
+              <input
+                type="number"
+                value={vbeln1}
+                onChange={e => setVbeln1(e.target.value)}
+                required
+                min={1}
+                step={1}
+                placeholder="Enter VBELN_1"
+                style={{ width: 180 }}
+              />
+            </label>
+            <button
+              className="btn btn-success btn-icon"
+              style={{ marginTop: 0 }}
+              disabled={loading || amending || !vbeln1 || isNaN(Number(vbeln1))}
+              type="submit"
+            >
+              <FaCheck className="icon" />
+              {amending ? (
+                <>
+                  <span className="spinner" /> Amending...
+                </>
+              ) : (
+                "Amend to Single SO"
+              )}
+            </button>
+          </form>
         </div>
       )}
     </div>

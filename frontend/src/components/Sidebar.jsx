@@ -13,6 +13,12 @@ const Sidebar = () => (
         <li>
           <Link className="sidebar-link" to="/splitso">Split SO</Link>
         </li>
+        <li>
+          <Link className="sidebar-link" to="/cpupdate">Car Plate Update</Link>
+        </li>
+        <li>
+          <Link className="sidebar-link" to="/barge">Barge Update</Link>
+        </li>
         {/* Add more links here */}
       </ul>
     </nav>

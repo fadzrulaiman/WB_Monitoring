@@ -40,13 +40,13 @@ exports.search = async (req, res) => {
 };
 
 exports.amendSplittingToSingleSO = async (req, res) => {
-    const { mwerks, wb_ticket, vbeln_1 = '2000003010', posnr_1 = '10' } = req.body;
+    const { mwerks, wb_ticket, vbeln_1, posnr_1 = '10' } = req.body;
     try {
         const pool = await poolPromise;
         await pool.request()
             .input("mwerks", sql.VarChar, mwerks)
             .input("wb_ticket", sql.VarChar, wb_ticket)
-            .input("vbeln_1", sql.VarChar, vbeln_1)
+            .input("vbeln_1", sql.VarChar, vbeln_1) // Use input value
             .input("posnr_1", sql.VarChar, posnr_1)
             .query(`
                 UPDATE [dbo].[WB_OUT]
