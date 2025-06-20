@@ -186,9 +186,35 @@ Contact: Internal IT, SKG Palm Oil
 * Export search results to CSV.
 * Add date picker UI and loading indicators.
 
+---
+
+# WB_Monitoring
+
+## Project Structure
+
+- `/frontend` - React.js frontend
+- `/backend` - Express.js backend
+
+## Development
+
+1. Install dependencies in both `frontend` and `backend`:
+   ```
+   cd frontend && npm install
+   cd ../backend && npm install
+   ```
+2. Start backend:
+   ```
+   cd backend && npm start
+   ```
+3. Start frontend:
+   ```
+   cd frontend && npm start
+   ```
+
+The frontend is configured to proxy API requests to the backend.
+
 ```
 
 ---
 
 Let me know if you'd like the file exported or saved in a specific format (e.g., `.md`, `.pdf`, etc.).
-```
