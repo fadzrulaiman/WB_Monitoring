@@ -19,6 +19,9 @@ const Sidebar = () => (
         <li>
           <Link className="sidebar-link" to="/barge">Barge Update</Link>
         </li>
+        <li>
+          <Link className="sidebar-link" to="/sqlexecute">SQL Executor</Link>
+        </li>
         {/* Add more links here */}
       </ul>
     </nav>

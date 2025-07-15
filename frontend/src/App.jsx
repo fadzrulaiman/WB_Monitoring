@@ -5,6 +5,7 @@ import FfbReupload from "./pages/FFBReupload/FfbReupload";
 import SplitSO from "./pages/SplitSO/SplitSO";
 import CPUpdate from "./pages/CPUpdate/CPUpdate";
 import BargeUpdate from "./pages/Barge/BargeUpdate";
+import SQLExecute from "./pages/SQLExecutor/SQLExecute";
 import "./App.css"; // Add this line
 
 const App = () => (
@@ -17,6 +18,7 @@ const App = () => (
           <Route path="/splitso" element={<SplitSO />} />
           <Route path="/cpupdate" element={<CPUpdate />} />
           <Route path="/barge" element={<BargeUpdate />} />
+          <Route path="/sqlexecute" element={<SQLExecute />} />
           {/* Add more routes here */}
           <Route path="*" element={<div style={{ padding: 24 }}>Welcome to WB Monitoring</div>} />
         </Routes>
