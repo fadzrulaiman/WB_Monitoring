@@ -24,6 +24,9 @@ app.use("/api/cp-update", cpUpdateRoutes);
 const bargeRoutes = require("./routes/barge.routes"); // <-- update path if needed
 app.use("/api/barge-update", bargeRoutes);
 
+// SQL Executor
+const sqlexecuteRoutes = require("./routes/sqlexecute.routes"); // <-- update path if needed
+app.use("/api/sqlexecute", sqlexecuteRoutes);
 
 // Catch-all: send React index.html for any other route
 app.get("*", (req, res) => {

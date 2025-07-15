@@ -136,6 +136,54 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* SQL Executor styles */
+.sql-exec-pagination {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.sql-exec-pagination .btn {
+  min-width: 70px;
+}
+
+.sql-exec-query-label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--primary);
+}
+
+.sql-exec-table-container {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.sql-exec-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fafafa;
+  box-shadow: var(--shadow);
+}
+
+.sql-exec-table th,
+.sql-exec-table td {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.sql-exec-table th {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.sql-exec-table tr:nth-child(even) {
+  background: var(--gray);
+}
+
 /* Responsive Design */
 @media (max-width: 900px) {
   .page-container {
