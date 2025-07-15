@@ -195,25 +195,44 @@ Contact: Internal IT, SKG Palm Oil
 - `/frontend` - React.js frontend
 - `/backend` - Express.js backend
 
-## Development
+## How to Run the Program
 
-1. Install dependencies in both `frontend` and `backend`:
-   ```
-   cd frontend && npm install
-   cd ../backend && npm install
-   ```
-2. Start backend:
-   ```
-   cd backend && npm start
-   ```
-3. Start frontend:
-   ```
-   cd frontend && npm start
-   ```
+### 1. Install Dependencies
 
-The frontend is configured to proxy API requests to the backend.
+Open a terminal and run the following commands:
 
+```bash
+cd frontend
+npm install
+cd ../backend
+npm install
 ```
+
+### 2. Start the Backend
+
+In the `/backend` directory, start the backend server:
+
+```bash
+npm start
+```
+
+By default, the backend runs on [http://localhost:3000](http://localhost:3000).
+
+### 3. Start the Frontend
+
+Open a new terminal, go to the `/frontend` directory, and start the frontend:
+
+```bash
+npm start
+```
+
+By default, the frontend runs on [http://localhost:3001](http://localhost:3001).
+
+### 4. Using the Application
+
+- Open your browser and go to [http://localhost:3001](http://localhost:3001).
+- Use the sidebar to navigate to different features, such as the SQL Executor.
+- The frontend is configured to proxy API requests to the backend, so no additional configuration is needed.
 
 ---
 
