@@ -1,239 +1,102 @@
-Here is a complete `README.md` file for your **FFB Reupload System (WB\_Monitoring)**, based on your project structure and description:
+# WB Monitoring
 
----
+A React + Express application for managing weighbridge (WB) data workflows such as FFB reuploads, split SO corrections, car-plate updates, and barge quantity adjustments. The backend connects to Microsoft SQL Server.
 
-```markdown
-# FFB Reupload System – WB Monitoring
+## Features
 
-A web-based system for managing Fresh Fruit Bunch (FFB) ticket reuploading from MSSQL database. This tool allows users to reset `ZSAPFLAG` for specific `WERKS` codes and date ranges.
+- Reset `ZSAPFLAG` for selected FFB tickets.
+- Amend split sales orders and car-plate details in WB tables.
+- Update barge gross/net quantities with live validation.
+- Optional (disabled) SQL `SELECT` executor for ad-hoc queries.
 
-## 📁 Project Structure
+## Prerequisites
 
-```
+- Node.js 18+
+- Microsoft SQL Server (reachable from the backend)
+- npm (bundled with Node.js)
 
-WB\_Monitoring/
-├── app.js                         # Express app setup
-├── server.js                      # Main entry point, starts HTTP server
-├── core/
-│   └── db.js                      # Database connection setup (MSSQL)
-├── modules/
-│   └── ffb-reupload/
-│       ├── ffb.routes.js         # Route definitions for FFB API
-│       └── ffb.controller.js     # Business logic for search and reupload
-├── public/
-│   └── ffb-reupload.html         # Frontend interface for ticket reupload
-├── README.md                      # Project documentation
+## Configuration
 
-````
-
----
-
-## 🚀 How It Works
-
-### 1. `server.js`
-- Starts the Express server.
-- Serves static files from `/public`.
-- Serves the main HTML interface at `/`.
-- Mounts the FFB Reupload API at `/api/ffb-reupload`.
-
-### 2. `app.js`
-- Configures the Express application instance.
-- Applies middleware like `express.json()`.
-- Imports and mounts API routes from `/modules/ffb-reupload`.
-
-### 3. `core/db.js`
-- Uses `mssql` and `tedious` packages to create and export a MSSQL connection pool.
-- Shared across the application using `poolPromise`.
-
-### 4. `ffb.controller.js`
-Defines three main controller functions:
-- `getWerks()`: Returns a list of distinct `WERKS` values from `WB_IN` table.
-- `search()`: Retrieves ticket data based on `WERKS` and `WB_DATE_IN` range.
-- `reupload()`: Sets `ZSAPFLAG = 'N'` for selected records.
-
-### 5. `ffb.routes.js`
-Registers routes:
-- `GET /api/ffb-reupload/werks`
-- `POST /api/ffb-reupload/search`
-- `POST /api/ffb-reupload/reupload`
-
-### 6. `public/ffb-reupload.html`
-- Frontend interface to interact with the backend API.
-- Allows users to:
-  - Select a WERKS value.
-  - Pick a date range.
-  - View results in a table.
-  - Reupload FFB tickets by clicking a button.
-
----
-
-## ⚙️ Setup Instructions
-
-### Prerequisites:
-- Node.js & npm
-- Microsoft SQL Server running
-- XAMPP (for local web environment)
-- Port `1433` open for MSSQL
-
-### Step-by-Step:
-
-1. **Install Dependencies:**
-   ```bash
-   npm install
-````
-
-2. **Configure DB Connection (`core/db.js`):**
-
-   ```js
-   const config = {
-     user: "wbuser",
-     password: "Sawit@2025",
-     server: "localhost",
-     database: "WBStagingDB",
-     options: {
-       encrypt: false,
-       trustServerCertificate: true
-     }
-   };
-   ```
-
-3. **Start the Server:**
-
-   ```bash
-   node server.js
-   ```
-
-4. **Open in Browser:**
-
-   ```
-   http://localhost:3000
-   ```
-
----
-
-## 🔌 API Reference
-
-### GET `/api/ffb-reupload/werks`
-
-* Returns array of `WERKS` codes.
-
-### POST `/api/ffb-reupload/search`
-
-**Request Body:**
-
-```json
-{
-  "werks": "1001",
-  "dateFrom": "2025-06-01",
-  "dateTo": "2025-06-15"
-}
-```
-
-**Response:** List of matching FFB records.
-
-### POST `/api/ffb-reupload/reupload`
-
-**Request Body:**
-
-```json
-{
-  "werks": "1001",
-  "dateFrom": "2025-06-01",
-  "dateTo": "2025-06-15"
-}
-```
-
-**Response:** `"FFB tickets reuploaded successfully."`
-
----
-
-## 🛠️ SQL Setup
-
-To create a new SQL user for the system:
-
-```sql
--- Create login
-CREATE LOGIN wbuser WITH PASSWORD = 'Sawit@2025';
-
--- Create user for the login in your DB
-USE WBStagingDB;
-CREATE USER wbuser FOR LOGIN wbuser;
-
--- Grant access
-ALTER ROLE db_datareader ADD MEMBER wbuser;
-ALTER ROLE db_datawriter ADD MEMBER wbuser;
-```
-
----
-
-## 🔒 Security Notes
-
-* Make sure to restrict access to `wbuser` if deploying publicly.
-* Avoid hardcoding credentials in `db.js`. Use `.env` file for sensitive config.
-
----
-
-## 👤 Author
-
-Developed by Fadzrul, Software Engineer – System Analyst
-Contact: Internal IT, SKG Palm Oil
-
----
-
-## 📌 Future Improvements
-
-* Add login/audit logs for tracking reupload activity.
-* Export search results to CSV.
-* Add date picker UI and loading indicators.
-
----
-
-# WB_Monitoring
-
-## Project Structure
-
-- `/frontend` - React.js frontend
-- `/backend` - Express.js backend
-
-## How to Run the Program
-
-### 1. Install Dependencies
-
-Open a terminal and run the following commands:
+The backend now relies on environment variables. Copy the template and fill in secure values:
 
 ```bash
+cd backend
+cp .env.example .env  # or copy manually on Windows
+```
+
+Update `.env` with your database credentials and preferences:
+
+```ini
+DB_USER=your_db_user
+DB_PASSWORD=your_strong_password
+DB_HOST=db.example.com
+DB_NAME=WBStagingDB
+# DB_PORT=1433
+# DB_ENCRYPT=true
+# DB_TRUST_SERVER_CERT=false
+
+PORT=3000
+ENABLE_SQL_EXECUTOR=false
+```
+
+> `ENABLE_SQL_EXECUTOR` must remain `false` in production. Set it to `true` only for trusted maintenance environments.
+
+On the frontend you can optionally expose the SQL executor by creating `frontend/.env`:
+
+```ini
+REACT_APP_ENABLE_SQL_EXECUTOR=false
+```
+
+Both sides default to disabled, so the UI will hide the tool and the backend will reject requests.
+
+## Installation
+
+```bash
+# Backend
+cd backend
+npm install
+
+# Frontend (in another terminal)
+cd ../frontend
+npm install
+```
+
+## Running Locally
+
+```bash
+# Backend
+cd backend
+npm start
+# -> http://localhost:3000
+
+# Frontend
 cd frontend
-npm install
-cd ../backend
-npm install
-```
-
-### 2. Start the Backend
-
-In the `/backend` directory, start the backend server:
-
-```bash
 npm start
+# -> http://localhost:3001 (CRA default)
 ```
 
-By default, the backend runs on [http://localhost:3000](http://localhost:3000).
+The React app proxies API calls to the backend via `frontend/package.json`.
 
-### 3. Start the Frontend
+## Security Notes
 
-Open a new terminal, go to the `/frontend` directory, and start the frontend:
+- Database credentials are no longer stored in source control; the server will refuse to start if required vars are missing.
+- SQL executor endpoints are opt-in and limited to a single `SELECT` statement even when enabled.
+- TLS is enabled by default on SQL connections (`encrypt=true`). Disable only for legacy/local instances using `DB_TRUST_SERVER_CERT=true`.
 
-```bash
-npm start
-```
+## Enabling the SQL Executor (for maintenance only)
 
-By default, the frontend runs on [http://localhost:3001](http://localhost:3001).
+1. Set `ENABLE_SQL_EXECUTOR=true` in `backend/.env`.
+2. Set `REACT_APP_ENABLE_SQL_EXECUTOR=true` in `frontend/.env` and rebuild the frontend (`npm start` reloads automatically).
+3. Restart both servers.
 
-### 4. Using the Application
+The executor still enforces single-statement `SELECT` queries, and attempted use while disabled returns HTTP 403.
 
-- Open your browser and go to [http://localhost:3001](http://localhost:3001).
-- Use the sidebar to navigate to different features, such as the SQL Executor.
-- The frontend is configured to proxy API requests to the backend, so no additional configuration is needed.
+## Troubleshooting
 
----
+- **Database connection fails**: verify host/port reachability and that TLS settings match the SQL Server configuration.
+- **SQL executor hidden**: ensure both environment variables are set to `true` and restart the servers.
+- **Barge quantities reset to blank**: with the new release, zero values are preserved; if you still see blanks, confirm the API returns data.
 
-Let me know if you'd like the file exported or saved in a specific format (e.g., `.md`, `.pdf`, etc.).
+## License
+
+Internal use only. Update this section if you plan to distribute the project.
