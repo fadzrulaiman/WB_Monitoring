@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `permission` MODIFY `name` ENUM('CREATE_USER', 'READ_USERS', 'UPDATE_USER', 'DELETE_USER') NOT NULL;

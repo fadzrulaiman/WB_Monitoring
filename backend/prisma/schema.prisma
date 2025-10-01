@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// 1. Define the generator for the Prisma Client
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 2. Define the datasource and connection URL
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 3. Define the data models
+
+// Enum for Role names for type safety
+enum RoleName {
+  ADMIN
+  USER
+}
+
+enum PermissionName {
+  CREATE_USER
+  READ_USERS
+  UPDATE_USER
+  DELETE_USER
+  READ_PROFILE
+  CREATE_ITEM
+  READ_ITEMS
+  UPDATE_ITEM
+  DELETE_ITEM
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+
+  role   Role   @relation(fields: [roleId], references: [id])
+  roleId String
+
+  // Relation to persisted refresh tokens
+  refreshTokens RefreshToken[]
+}
+
+model Role {
+  id   String   @id @default(cuid())
+  name RoleName @unique
+
+  users           User[]
+  rolePermissions RolePermission[]
+}
+
+model Permission {
+  id   String         @id @default(cuid())
+  name PermissionName @unique
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId       String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permissionId String
+
+  @@id([roleId, permissionId])
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  quantity    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Persisted refresh tokens for rotation and revocation
+model RefreshToken {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  isRevoked  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([userId])
+}

@@ -205,3 +205,89 @@ body {
   vertical-align: middle;
   font-size: 1.1em;
 }
+.tickets-table-wrapper {
+  margin-top: 18px;
+}
+
+.tickets-table-container {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.tickets-table--ffb {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  table-layout: auto;
+}
+
+.tickets-pagination {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tickets-pagination__info {
+  font-weight: 500;
+  color: #4a4a4a;
+}
+
+.tickets-pagination__controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tickets-pagination__controls .btn {
+  padding: 6px 12px;
+  min-width: 70px;
+  font-size: 0.9rem;
+}
+
+.tickets-pagination__page-indicator {
+  font-weight: 600;
+}
+
+.tickets-pagination__page-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.tickets-pagination__page-size select {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.btn-pagination {
+  background: #ffffff;
+  color: #1f2a37;
+  border: 1px solid var(--border);
+}
+
+.btn-pagination:hover:not(:disabled) {
+  background: #eef2f6;
+}
+
+.btn-pagination:disabled {
+  background: #f5f5f5;
+  color: #9e9e9e;
+  border-color: #e0e0e0;
+}
+
+@media (max-width: 600px) {
+  .tickets-pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tickets-pagination__controls {
+    justify-content: center;
+  }
+}
+
