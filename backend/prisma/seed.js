@@ -1,4 +1,5 @@
-import { PrismaClient, RoleName, PermissionName } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient, RoleName, PermissionName } = pkg;
 import bcrypt from 'bcryptjs'; // Ensure bcryptjs is a dev dependency
 
 const prisma = new PrismaClient();
@@ -142,3 +143,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

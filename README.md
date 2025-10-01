@@ -61,6 +61,28 @@ cd ../frontend
 npm install
 ```
 
+## Prisma Database Setup
+
+Prisma maintains the authentication and authorization tables in MySQL; ensure `backend/.env` contains a valid `DATABASE_URL` before running these commands.
+
+### Apply migrations
+
+```bash
+cd backend
+npx prisma migrate deploy
+```
+
+Use `npx prisma migrate dev --name descriptive_name` during development to create and apply new migrations in one step.
+
+### Seed reference data
+
+```bash
+cd backend
+npx prisma db seed
+```
+
+The seed script is idempotent and will insert default roles, permissions, and optional admin/user accounts when `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `USER_EMAIL`, and `USER_PASSWORD` are set in `.env`.
+
 ## Running Locally
 
 ```bash
@@ -100,3 +122,4 @@ The executor still enforces single-statement `SELECT` queries, and attempted use
 ## License
 
 Internal use only. Update this section if you plan to distribute the project.
+
