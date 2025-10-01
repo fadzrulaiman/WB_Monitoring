@@ -19,9 +19,18 @@ dotenv.config();
 const app = express();
 const enableSqlExecutor = process.env.ENABLE_SQL_EXECUTOR === 'true';
 
-// CORS configuration to allow frontend origin and cookies
+// Support comma-separated list of allowed frontend origins
+const rawOrigins = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:5173';
+const allowedOrigins = rawOrigins.split(',').map(origin => origin.trim()).filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    const message = `Origin ${origin ?? '(unknown)'} not allowed by CORS`;
+    return callback(new Error(message));
+  },
   credentials: true,
 };
 app.use(cors(corsOptions));
