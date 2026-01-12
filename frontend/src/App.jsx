@@ -45,10 +45,20 @@ function App() {
             <Route element={<PrivateRoute allowedRoles={['ADMIN']} />}>
               <Route path="admin" element={<AdminPage />} />
               <Route path="admin/users/:id/edit" element={<EditUserPage />} />
+            </Route>
+            <Route element={<PrivateRoute allowedPermissions={['WB_FFB_REUPLOAD']} />}>
               <Route path="/ffbreupload" element={<FfbReupload />} />
+            </Route>
+            <Route element={<PrivateRoute allowedPermissions={['WB_SPLIT_SO']} />}>
               <Route path="/splitso" element={<SplitSO />} />
+            </Route>
+            <Route element={<PrivateRoute allowedPermissions={['WB_CP_UPDATE']} />}>
               <Route path="/cpupdate" element={<CPUpdate />} />
+            </Route>
+            <Route element={<PrivateRoute allowedPermissions={['WB_BARGE_UPDATE']} />}>
               <Route path="/barge" element={<BargeUpdate />} />
+            </Route>
+            <Route element={<PrivateRoute allowedPermissions={['WB_SQL_EXECUTE']} />}>
               <Route path="/sqlexecute" element={<SQLExecute />} />
             </Route>
           </Route>

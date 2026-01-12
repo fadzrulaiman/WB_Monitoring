@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios from "../api/axios";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FaSearch, FaCheck, FaSyncAlt, FaExclamationTriangle } from "react-icons/fa";
 import "../App.css";
 
 const SplitSO = () => {
+  const axiosPrivate = useAxiosPrivate();
   const [mwerksList, setMWerksList] = useState([]);
   const [mwerks, setMWerks] = useState("");
   const [date, setDate] = useState("");
@@ -33,7 +34,7 @@ const SplitSO = () => {
 
   // Fetch MWERKS on mount
   useEffect(() => {
-    axios
+    axiosPrivate
       .get("split-so/mwerks")
       .then((res) => {
         if (Array.isArray(res.data)) {
@@ -45,7 +46,7 @@ const SplitSO = () => {
         }
       })
       .catch(() => setMWerksList([]));
-  }, []);
+  }, [axiosPrivate]);
 
   // Fetch WB_TICKETs when MWERKS and date are selected
   useEffect(() => {
@@ -56,7 +57,7 @@ const SplitSO = () => {
     setError("");
     if (mwerks && date) {
       const isoDate = toISODate(date);
-      axios
+      axiosPrivate
         .get("split-so/wb-tickets", {
           params: { mwerks, WBDATE_IN: isoDate },
         })
@@ -65,7 +66,7 @@ const SplitSO = () => {
         })
         .catch(() => setWbTickets([]));
     }
-  }, [mwerks, date]);
+  }, [mwerks, date, axiosPrivate]);
 
   // Clear ticket detail and message when ticket changes
   useEffect(() => {
@@ -133,7 +134,7 @@ const SplitSO = () => {
     setError("");
 
     try {
-      await axios.post("split-so/amend-single-so", {
+      await axiosPrivate.post("split-so/amend-single-so", {
         mwerks,
         wb_ticket: wbTicket,
         vbeln_1: vbeln1, // Pass vbeln_1
@@ -164,7 +165,7 @@ const SplitSO = () => {
     setError("");
     setTicketDetail(null);
     try {
-      const res = await axios.post("split-so/search", {
+      const res = await axiosPrivate.post("split-so/search", {
         mwerks,
         dateFrom: date,
         dateTo: date,

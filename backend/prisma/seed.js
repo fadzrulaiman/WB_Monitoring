@@ -39,10 +39,16 @@ async function main() {
     'READ_ITEMS',
     'UPDATE_ITEM',
     'DELETE_ITEM',
+    'WB_FFB_REUPLOAD',
+    'WB_SPLIT_SO',
+    'WB_CP_UPDATE',
+    'WB_BARGE_UPDATE',
+    'WB_SQL_EXECUTE',
   ].map(name => ({ name }));
   // Validate and upsert permissions sequentially for clearer error logging
   const allowedNames = new Set([
-    'CREATE_USER','READ_USERS','UPDATE_USER','DELETE_USER','READ_PROFILE','CREATE_ITEM','READ_ITEMS','UPDATE_ITEM','DELETE_ITEM'
+    'CREATE_USER','READ_USERS','UPDATE_USER','DELETE_USER','READ_PROFILE','CREATE_ITEM','READ_ITEMS','UPDATE_ITEM','DELETE_ITEM',
+    'WB_FFB_REUPLOAD','WB_SPLIT_SO','WB_CP_UPDATE','WB_BARGE_UPDATE','WB_SQL_EXECUTE'
   ]);
   for (const permission of permissionsToCreate) {
     if (!permission || typeof permission.name !== 'string' || permission.name.trim() === '' || !allowedNames.has(permission.name)) {
@@ -70,10 +76,17 @@ async function main() {
       PermissionName.READ_ITEMS,
       PermissionName.UPDATE_ITEM,
       PermissionName.DELETE_ITEM,
+      PermissionName.WB_FFB_REUPLOAD,
+      PermissionName.WB_SPLIT_SO,
+      PermissionName.WB_CP_UPDATE,
+      PermissionName.WB_BARGE_UPDATE,
+      PermissionName.WB_SQL_EXECUTE,
     ],
     USER: [
       PermissionName.READ_PROFILE,
       PermissionName.READ_ITEMS,
+      PermissionName.WB_FFB_REUPLOAD,
+      PermissionName.WB_SPLIT_SO,
     ],
   };
 

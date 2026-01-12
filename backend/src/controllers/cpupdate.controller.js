@@ -22,35 +22,46 @@ export const getWerks = async (req, res) => {
   }
 };
 
-const updateCarPlate = async (req, res) => {
-  const { wb_ticket, cplate } = req.body;
-  if (!wb_ticket || !cplate) {
-    return res.status(400).json({ error: 'wb_ticket and cplate are required' });
-  }
+const updateCarPlateTransaction = async ({ wb_ticket, cplate, mwerks, werks }) => {
+  const pool = await poolPromise;
+  const transaction = new sql.Transaction(pool);
   try {
-    const pool = await poolPromise;
-    await pool
-      .request()
+    await transaction.begin();
+
+    const outRequest = new sql.Request(transaction)
       .input('wb_ticket', sql.VarChar, wb_ticket)
-      .input('cplate', sql.VarChar, cplate)
-      .query(`
-        UPDATE [dbo].[WB_OUT]
-        SET [CPLATE] = @cplate, [ZSAPFLAG] = 'N'
-        WHERE WB_TICKET = @wb_ticket
-      `);
-    await pool
-      .request()
+      .input('cplate', sql.VarChar, cplate);
+    if (mwerks) {
+      outRequest.input('mwerks', sql.VarChar, mwerks);
+    }
+    const outWhere = mwerks ? 'AND MWERKS = @mwerks' : '';
+    await outRequest.query(`
+      UPDATE [dbo].[WB_OUT]
+      SET [CPLATE] = @cplate, [ZSAPFLAG] = 'N'
+      WHERE WB_TICKET = @wb_ticket ${outWhere}
+    `);
+
+    const inRequest = new sql.Request(transaction)
       .input('wb_ticket', sql.VarChar, wb_ticket)
-      .input('cplate', sql.VarChar, cplate)
-      .query(`
-        UPDATE [dbo].[WB_IN]
-        SET [CPLATE] = @cplate, [ZSAPFLAG] = 'N'
-        WHERE WB_TICKET = @wb_ticket
-      `);
-    res.send('Car plate updated successfully in WB_OUT and WB_IN.');
+      .input('cplate', sql.VarChar, cplate);
+    if (werks) {
+      inRequest.input('werks', sql.VarChar, werks);
+    }
+    const inWhere = werks ? 'AND WERKS = @werks' : '';
+    await inRequest.query(`
+      UPDATE [dbo].[WB_IN]
+      SET [CPLATE] = @cplate, [ZSAPFLAG] = 'N'
+      WHERE WB_TICKET = @wb_ticket ${inWhere}
+    `);
+
+    await transaction.commit();
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Error updating car plate number.');
+    try {
+      await transaction.rollback();
+    } catch (rollbackError) {
+      console.error('Failed to rollback car plate update transaction:', rollbackError);
+    }
+    throw err;
   }
 };
 
@@ -91,21 +102,11 @@ export const updateCarPlateOut = async (req, res) => {
     return res.status(400).json({ error: 'wb_ticket, cplate, and mwerks are required' });
   }
   try {
-    const pool = await poolPromise;
-    await pool
-      .request()
-      .input('wb_ticket', sql.VarChar, wb_ticket)
-      .input('cplate', sql.VarChar, cplate)
-      .input('mwerks', sql.VarChar, mwerks)
-      .query(`
-        UPDATE [dbo].[WB_OUT]
-        SET [CPLATE] = @cplate, [ZSAPFLAG] = 'N'
-        WHERE MWERKS = @mwerks AND WB_TICKET = @wb_ticket
-      `);
-    res.send('Car plate updated successfully in WB_OUT.');
+    await updateCarPlateTransaction({ wb_ticket, cplate, mwerks });
+    res.send('Car plate updated successfully in WB_OUT and WB_IN.');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error updating car plate number in WB_OUT.');
+    res.status(500).send('Error updating car plate number in WB_OUT and WB_IN.');
   }
 };
 
@@ -115,21 +116,11 @@ export const updateCarPlateIn = async (req, res) => {
     return res.status(400).json({ error: 'wb_ticket, cplate, and werks are required' });
   }
   try {
-    const pool = await poolPromise;
-    await pool
-      .request()
-      .input('wb_ticket', sql.VarChar, wb_ticket)
-      .input('cplate', sql.VarChar, cplate)
-      .input('werks', sql.VarChar, werks)
-      .query(`
-        UPDATE [dbo].[WB_IN]
-        SET [CPLATE] = @cplate, [ZSAPFLAG] = 'N'
-        WHERE WERKS = @werks AND WB_TICKET = @wb_ticket
-      `);
-    res.send('Car plate updated successfully in WB_IN.');
+    await updateCarPlateTransaction({ wb_ticket, cplate, werks });
+    res.send('Car plate updated successfully in WB_OUT and WB_IN.');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error updating car plate number in WB_IN.');
+    res.status(500).send('Error updating car plate number in WB_OUT and WB_IN.');
   }
 };
 

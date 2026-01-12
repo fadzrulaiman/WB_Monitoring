@@ -9,8 +9,14 @@ import {
   getWerksByTicket,
   getMWerksByTicket,
 } from '../controllers/cpupdate.controller.js';
+import { authenticateToken as authenticate } from '../middleware/auth.middleware.js';
+import { checkPermission } from '../middleware/authorization.middleware.js';
+import { PermissionName } from '@prisma/client';
 
 const router = Router();
+
+router.use(authenticate);
+router.use(checkPermission(PermissionName.WB_CP_UPDATE));
 
 router.get('/mwerks', getMWerks);
 router.get('/werks', getWerks);

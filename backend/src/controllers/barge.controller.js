@@ -30,7 +30,8 @@ export const getwbticket = async (req, res) => {
 
 export const updateBargeQuantity = async (req, res) => {
   const { wb_ticket, grossqty, netqty, mwerks } = req.body;
-  if (!wb_ticket || !grossqty || !netqty || !mwerks) {
+  const isMissing = (value) => value === undefined || value === null || value === '';
+  if (isMissing(wb_ticket) || isMissing(grossqty) || isMissing(netqty) || isMissing(mwerks)) {
     return res.status(400).json({ error: 'wb_ticket, grossqty, netqty, and mwerks are required' });
   }
   try {

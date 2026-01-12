@@ -44,7 +44,7 @@ ENABLE_SQL_EXECUTOR=false
 On the frontend you can optionally expose the SQL executor by creating `frontend/.env`:
 
 ```ini
-REACT_APP_ENABLE_SQL_EXECUTOR=false
+VITE_ENABLE_SQL_EXECUTOR=false
 ```
 
 Both sides default to disabled, so the UI will hide the tool and the backend will reject requests.
@@ -108,8 +108,9 @@ The React app proxies API calls to the backend via `frontend/package.json`.
 ## Enabling the SQL Executor (for maintenance only)
 
 1. Set `ENABLE_SQL_EXECUTOR=true` in `backend/.env`.
-2. Set `REACT_APP_ENABLE_SQL_EXECUTOR=true` in `frontend/.env` and rebuild the frontend (`npm start` reloads automatically).
-3. Restart both servers.
+2. Set `VITE_ENABLE_SQL_EXECUTOR=true` in `frontend/.env` and rebuild the frontend (`npm start` reloads automatically).
+3. Ensure the requesting user has the `WB_SQL_EXECUTE` permission.
+4. Restart both servers.
 
 The executor still enforces single-statement `SELECT` queries, and attempted use while disabled returns HTTP 403.
 

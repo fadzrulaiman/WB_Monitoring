@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios from "../api/axios";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FaSearch, FaCheck, FaEdit, FaExclamationTriangle, FaSyncAlt } from "react-icons/fa";
 import "../App.css";
 
 const CPUpdate = () => {
+  const axiosPrivate = useAxiosPrivate();
   const [wbTicket, setWbTicket] = useState("");
   const [cplate, setCPlate] = useState("");
   const [viewResult, setViewResult] = useState(null);
@@ -41,17 +42,17 @@ const CPUpdate = () => {
       table === "WB_IN"
         ? "cp-update/werks-by-ticket"
         : "cp-update/mwerks-by-ticket";
-    axios
+    axiosPrivate
       .get(url, { params: { wb_ticket: wbTicket.trim() } })
       .then((res) => {
         setPlantList(Array.isArray(res.data) ? res.data : []);
         setPlantLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setPlantList([]);
         setPlantLoading(false);
       });
-  }, [table, wbTicket]);
+  }, [table, wbTicket, axiosPrivate]);
 
   // View car plate info
   const handleView = async (e) => {
@@ -68,7 +69,7 @@ const CPUpdate = () => {
           setLoading(false);
           return;
         }
-        res = await axios.get("cp-update/view-car-plate-out", {
+        res = await axiosPrivate.get("cp-update/view-car-plate-out", {
           params: { wb_ticket: wbTicket, mwerks: plant }
         });
       } else if (table === "WB_IN") {
@@ -77,7 +78,7 @@ const CPUpdate = () => {
           setLoading(false);
           return;
         }
-        res = await axios.get("cp-update/view-car-plate-in", {
+        res = await axiosPrivate.get("cp-update/view-car-plate-in", {
           params: { wb_ticket: wbTicket, werks: plant }
         });
       } else {
@@ -104,13 +105,13 @@ const CPUpdate = () => {
     setMessage("");
     try {
       if (table === "WB_OUT") {
-        await axios.post("cp-update/update-car-plate-out", {
+        await axiosPrivate.post("cp-update/update-car-plate-out", {
           wb_ticket: wbTicket,
           cplate,
           mwerks: plant,
         });
       } else if (table === "WB_IN") {
-        await axios.post("cp-update/update-car-plate-in", {
+        await axiosPrivate.post("cp-update/update-car-plate-in", {
           wb_ticket: wbTicket,
           cplate,
           werks: plant,

@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "../api/axios";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FaSearch, FaCheck, FaExclamationTriangle, FaRedo } from "react-icons/fa";
 import "../App.css";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 const FfbReupload = () => {
+  const axiosPrivate = useAxiosPrivate();
   const [werksList, setWerksList] = useState([]);
   const [werks, setWerks] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -22,7 +23,7 @@ const FfbReupload = () => {
   const [rowsPerPage, setRowsPerPage] = useState(PAGE_SIZE_OPTIONS[0]);
 
   useEffect(() => {
-    axios
+    axiosPrivate
       .get("ffb-reupload/werks")
       .then((res) => {
         const data = res.data;
@@ -35,7 +36,7 @@ const FfbReupload = () => {
         }
       })
       .catch(() => setWerksList([]));
-  }, []);
+  }, [axiosPrivate]);
 
   const sortedTickets = useMemo(() => {
     if (!sortKey) return tickets;
@@ -107,7 +108,7 @@ const FfbReupload = () => {
     setTickets([]);
 
     try {
-      const res = await axios.post("ffb-reupload/search", { werks, dateFrom, dateTo });
+      const res = await axiosPrivate.post("ffb-reupload/search", { werks, dateFrom, dateTo });
       const data = Array.isArray(res.data) ? res.data : [];
       setTickets(data);
       if (!data.length) {
@@ -133,7 +134,7 @@ const FfbReupload = () => {
     setMessage("");
 
     try {
-      await axios.post("ffb-reupload/reupload", { werks, dateFrom, dateTo });
+      await axiosPrivate.post("ffb-reupload/reupload", { werks, dateFrom, dateTo });
       setMessage("Tickets flagged for reupload successfully.");
       setShowMessage(true);
     } catch (err) {

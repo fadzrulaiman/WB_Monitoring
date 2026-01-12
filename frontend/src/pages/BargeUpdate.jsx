@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios from "../api/axios";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { FaSearch, FaEdit, FaCheck, FaExclamationTriangle, FaSyncAlt } from "react-icons/fa";
 import "../App.css";
 
 const BargeUpdate = () => {
+  const axiosPrivate = useAxiosPrivate();
   const [mwerksList, setMWerksList] = useState([]);
   const [mwerks, setMWerks] = useState("");
   const [wbTicketList, setWbTicketList] = useState([]);
@@ -19,15 +20,15 @@ const BargeUpdate = () => {
 
   // Fetch MWERKS on mount
   useEffect(() => {
-    axios.get("barge-update/mwerks")
+    axiosPrivate.get("barge-update/mwerks")
       .then(res => setMWerksList(Array.isArray(res.data) ? res.data : []))
       .catch(() => setMWerksList([]));
-  }, []);
+  }, [axiosPrivate]);
 
   // Fetch WB_TICKETs when MWERKS changes
   useEffect(() => {
     if (mwerks) {
-      axios.get("barge-update/wb-ticket", { params: { mwerks } })
+      axiosPrivate.get("barge-update/wb-ticket", { params: { mwerks } })
         .then(res => setWbTicketList(Array.isArray(res.data) ? res.data : []))
         .catch(() => setWbTicketList([]));
       setWbTicket("");
@@ -41,7 +42,7 @@ const BargeUpdate = () => {
       setGrossQty("");
       setNetQty("");
     }
-  }, [mwerks]);
+  }, [mwerks, axiosPrivate]);
 
   // View barge quantity
   const handleView = async (e) => {
@@ -53,7 +54,7 @@ const BargeUpdate = () => {
     setGrossQty("");
     setNetQty("");
     try {
-      const res = await axios.get("barge-update/view-quantity", {
+      const res = await axiosPrivate.get("barge-update/view-quantity", {
         params: { wb_ticket: wbTicket, mwerks }
       });
       setViewResult(res.data);
@@ -77,7 +78,7 @@ const BargeUpdate = () => {
     setError("");
     setMessage("");
     try {
-      await axios.post("barge-update/update-quantity", {
+      await axiosPrivate.post("barge-update/update-quantity", {
         wb_ticket: wbTicket,
         grossqty: grossQty,
         netqty: netQty,
@@ -209,8 +210,8 @@ const BargeUpdate = () => {
             updating ||
             !mwerks ||
             !wbTicket ||
-            !grossQty ||
-            !netQty
+            grossQty === "" ||
+            netQty === ""
           }
         >
           <FaEdit className="icon" />
