@@ -6,11 +6,12 @@ const host = env.VITE_HOST ?? '0.0.0.0';
 const port = Number(env.VITE_PORT ?? 5173);
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
+  base: mode === 'production' ? '/WB_Monitoring/' : '/',
   server: {
     host,
     port,
     strictPort: true,
   },
-});
+}));

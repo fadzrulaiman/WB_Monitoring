@@ -12,12 +12,14 @@ A React + Express application for managing weighbridge (WB) data workflows such 
 ## Prerequisites
 
 - Node.js 18+
-- Microsoft SQL Server (reachable from the backend)
 - npm (bundled with Node.js)
+- Microsoft SQL Server (reachable from the backend, provides WB_IN/WB_OUT tables)
+- MySQL (for auth, roles, permissions, items, refresh tokens)
+- Optional: SMTP service for password reset emails
 
 ## Configuration
 
-The backend now relies on environment variables. Copy the template and fill in secure values:
+Create `backend/.env` (copy `backend/.env.example` if you add one) and fill in secure values:
 
 ```bash
 cd backend
@@ -86,18 +88,129 @@ The seed script is idempotent and will insert default roles, permissions, and op
 ## Running Locally
 
 ```bash
-# Backend
+# Backend (with nodemon)
 cd backend
-npm start
+npm run dev
 # -> http://localhost:3000
 
-# Frontend
+# Frontend (Vite)
 cd frontend
-npm start
-# -> http://localhost:3001 (CRA default)
+npm run dev
+# -> http://localhost:5173
 ```
 
-The React app proxies API calls to the backend via `frontend/package.json`.
+The frontend uses `VITE_API_BASE_URL` or `VITE_API_PORT` (see `frontend/src/api/axios.js`) to reach the backend.
+
+## New Server Setup (Production)
+
+1. Install Node.js 18+ and npm on the server.
+2. Provision databases:
+   - MySQL database for Prisma auth tables.
+   - MSSQL access with a user that can read/write `WB_IN` and `WB_OUT`.
+3. Clone the repository to the server.
+4. Install dependencies:
+
+```bash
+cd backend
+npm install
+cd ../frontend
+npm install
+```
+
+5. Create `backend/.env` with required values (MySQL `DATABASE_URL`, MSSQL `DB_*`, JWT secrets, CORS origins, email settings).
+6. Create `frontend/.env` with `VITE_API_BASE_URL` (or `VITE_API_PORT`) and optional `VITE_ENABLE_SQL_EXECUTOR`.
+7. Run Prisma migrations and seed:
+
+```bash
+cd backend
+npx prisma migrate deploy
+npx prisma db seed
+```
+
+8. Build the frontend:
+
+```bash
+cd frontend
+npm run build
+```
+
+9. Start the backend:
+
+```bash
+cd backend
+npm start
+```
+
+10. Serve the frontend build (from `frontend/dist`) using your preferred web server, or adjust `backend/src/server.js` to point at `frontend/dist` if you want Node to serve the static files.
+
+### Windows + XAMPP example (HTTPS + /api proxy)
+
+If the frontend is served over HTTPS, the API must also be HTTPS to avoid mixed-content blocks. The simplest fix is to proxy `/api` through Apache and set `VITE_API_BASE_URL=/api` before building.
+
+1. Enable required Apache modules in `C:\xampp\apache\conf\httpd.conf`:
+
+```apache
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule ssl_module modules/mod_ssl.so
+```
+
+2. Update your SSL virtual host in `C:\xampp\apache\conf\extra\httpd-ssl.conf`:
+
+```apache
+<VirtualHost _default_:443>
+  ServerName 10.13.1.223:443
+  DocumentRoot "C:/xampp/htdocs/WB_Monitoring"
+
+  ProxyPreserveHost On
+  ProxyPass "/api/" "http://127.0.0.1:3000/api/"
+  ProxyPassReverse "/api/" "http://127.0.0.1:3000/api/"
+</VirtualHost>
+```
+
+3. Set the frontend API base URL and rebuild:
+
+```ini
+VITE_API_BASE_URL=/api
+```
+
+```bash
+cd frontend
+npm run build
+```
+
+4. Copy the contents of `frontend/dist` into `C:\xampp\htdocs\WB_Monitoring` and restart Apache.
+5. Ensure `FRONTEND_URLS` in `backend/.env` includes your HTTPS origin (for example `https://10.13.1.223`), then restart the backend.
+
+### Keep the backend running (PM2)
+
+```bash
+cd backend
+npm i -g pm2
+pm2 start src/index.js --name wb-backend
+pm2 save
+```
+
+On Windows, use a service wrapper (for example `pm2-installer` or `pm2-windows-service`) so PM2 starts on boot.
+
+### Updating a deployed server
+
+```bash
+cd C:\xampp\htdocs\WB_Monitoring
+git pull origin <branch>
+
+cd backend
+npm install
+npx prisma generate
+npx prisma migrate deploy
+pm2 restart wb-backend
+
+cd ../frontend
+npm install
+npm run build
+```
+
+Copy the contents of `frontend/dist` to your web root after each build.
 
 ## Security Notes
 

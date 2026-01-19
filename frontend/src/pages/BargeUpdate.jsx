@@ -7,6 +7,8 @@ const BargeUpdate = () => {
   const axiosPrivate = useAxiosPrivate();
   const [mwerksList, setMWerksList] = useState([]);
   const [mwerks, setMWerks] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [wbTicketList, setWbTicketList] = useState([]);
   const [wbTicket, setWbTicket] = useState("");
   const [viewResult, setViewResult] = useState(null);
@@ -25,10 +27,12 @@ const BargeUpdate = () => {
       .catch(() => setMWerksList([]));
   }, [axiosPrivate]);
 
-  // Fetch WB_TICKETs when MWERKS changes
+  const isDateRangeValid = !dateFrom || !dateTo || dateFrom <= dateTo;
+
+  // Fetch WB_TICKETs when MWERKS or date range changes
   useEffect(() => {
-    if (mwerks) {
-      axiosPrivate.get("barge-update/wb-ticket", { params: { mwerks } })
+    if (mwerks && dateFrom && dateTo) {
+      axiosPrivate.get("barge-update/wb-ticket", { params: { mwerks, dateFrom, dateTo } })
         .then(res => setWbTicketList(Array.isArray(res.data) ? res.data : []))
         .catch(() => setWbTicketList([]));
       setWbTicket("");
@@ -42,11 +46,19 @@ const BargeUpdate = () => {
       setGrossQty("");
       setNetQty("");
     }
-  }, [mwerks, axiosPrivate]);
+  }, [mwerks, dateFrom, dateTo, axiosPrivate]);
 
   // View barge quantity
   const handleView = async (e) => {
     e.preventDefault();
+    if (!dateFrom || !dateTo) {
+      setError("Please select a start and end date.");
+      return;
+    }
+    if (!isDateRangeValid) {
+      setError("Start date must be before or equal to end date.");
+      return;
+    }
     setLoading(true);
     setError("");
     setMessage("");
@@ -55,7 +67,7 @@ const BargeUpdate = () => {
     setNetQty("");
     try {
       const res = await axiosPrivate.get("barge-update/view-quantity", {
-        params: { wb_ticket: wbTicket, mwerks }
+        params: { wb_ticket: wbTicket, mwerks, dateFrom, dateTo }
       });
       setViewResult(res.data);
       if (res.data) {
@@ -111,19 +123,37 @@ const BargeUpdate = () => {
           </select>
         </label>
         <label>
+          Date From:
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={e => setDateFrom(e.target.value)}
+            required
+          />
+        </label>
+        <label>
+          Date To:
+          <input
+            type="date"
+            value={dateTo}
+            onChange={e => setDateTo(e.target.value)}
+            required
+          />
+        </label>
+        <label>
           WB_TICKET:
           <select
             value={wbTicket}
             onChange={e => setWbTicket(e.target.value)}
             required
-            disabled={!mwerks || wbTicketList.length === 0}
+            disabled={!mwerks || !dateFrom || !dateTo || wbTicketList.length === 0}
           >
             <option value="">
-              {mwerks
+              {mwerks && dateFrom && dateTo
                 ? wbTicketList.length === 0
                   ? "No WB_TICKET found"
                   : "Select WB_TICKET"
-                : "Select MWERKS first"}
+                : "Select MWERKS and date range first"}
             </option>
             {wbTicketList.map(wb => (
               <option key={wb} value={wb}>{wb}</option>
@@ -133,7 +163,7 @@ const BargeUpdate = () => {
         <button
           type="submit"
           className="btn btn-icon"
-          disabled={loading || !mwerks || !wbTicket}
+          disabled={loading || !mwerks || !dateFrom || !dateTo || !isDateRangeValid || !wbTicket}
         >
           <FaSearch className="icon" />
           {loading ? (
@@ -164,6 +194,7 @@ const BargeUpdate = () => {
             <table className="tickets-table">
               <thead>
                 <tr>
+                  <th>ZWB_TRXTYP</th>
                   <th>GROSS_QTY</th>
                   <th>NETGB_QTY</th>
                   <th>ZSAPFLAG</th>
@@ -171,6 +202,7 @@ const BargeUpdate = () => {
               </thead>
               <tbody>
                 <tr>
+                  <td>{viewResult?.ZWB_TRXTYP ?? "-"}</td>
                   <td>{viewResult?.GROSS_QTY ?? "-"}</td>
                   <td>{(viewResult?.NETBG_QTY ?? viewResult?.NETGB_QTY) ?? "-"}</td>
                   <td>{viewResult?.ZSAPFLAG ?? "-"}</td>

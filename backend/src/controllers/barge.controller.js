@@ -13,14 +13,22 @@ export const getMWerks = async (req, res) => {
 
 export const getwbticket = async (req, res) => {
   try {
+    const { dateFrom, dateTo } = req.query;
+    if ((dateFrom && !dateTo) || (!dateFrom && dateTo)) {
+      return res.status(400).json({ error: 'dateFrom and dateTo must be provided together' });
+    }
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input('mwerks', sql.VarChar, req.query.mwerks)
-      .query(`
-        SELECT DISTINCT WB_TICKET FROM [dbo].[WB_OUT]
-        WHERE MWERKS = @mwerks ORDER BY WB_TICKET
-      `);
+    const request = pool.request().input('mwerks', sql.VarChar, req.query.mwerks);
+    let query = `
+      SELECT DISTINCT WB_TICKET FROM [dbo].[WB_OUT]
+      WHERE MWERKS = @mwerks
+    `;
+    if (dateFrom && dateTo) {
+      request.input('dateFrom', sql.Date, dateFrom).input('dateTo', sql.Date, dateTo);
+      query += ' AND CAST(WBDATE_IN AS DATE) BETWEEN @dateFrom AND @dateTo';
+    }
+    query += ' ORDER BY WB_TICKET';
+    const result = await request.query(query);
     res.json(Array.isArray(result.recordset) ? result.recordset.map((r) => r.WB_TICKET) : []);
   } catch (err) {
     console.error(err);
@@ -55,20 +63,28 @@ export const updateBargeQuantity = async (req, res) => {
 };
 
 export const viewBargeQuantity = async (req, res) => {
-  const { wb_ticket, mwerks } = req.query;
+  const { wb_ticket, mwerks, dateFrom, dateTo } = req.query;
   if (!wb_ticket || !mwerks) {
     return res.status(400).json({ error: 'wb_ticket and mwerks are required' });
   }
+  if ((dateFrom && !dateTo) || (!dateFrom && dateTo)) {
+    return res.status(400).json({ error: 'dateFrom and dateTo must be provided together' });
+  }
   try {
     const pool = await poolPromise;
-    const outResult = await pool
+    const request = pool
       .request()
       .input('wb_ticket', sql.VarChar, wb_ticket)
-      .input('mwerks', sql.VarChar, mwerks)
-      .query(`
-        SELECT GROSS_QTY, NETBG_QTY, ZSAPFLAG FROM [dbo].[WB_OUT]
-        WHERE WB_TICKET = @wb_ticket AND MWERKS = @mwerks
-      `);
+      .input('mwerks', sql.VarChar, mwerks);
+    let query = `
+      SELECT GROSS_QTY, NETBG_QTY, ZWB_TRXTYP, ZSAPFLAG FROM [dbo].[WB_OUT]
+      WHERE WB_TICKET = @wb_ticket AND MWERKS = @mwerks
+    `;
+    if (dateFrom && dateTo) {
+      request.input('dateFrom', sql.Date, dateFrom).input('dateTo', sql.Date, dateTo);
+      query += ' AND CAST(WBDATE_IN AS DATE) BETWEEN @dateFrom AND @dateTo';
+    }
+    const outResult = await request.query(query);
     res.json(outResult.recordset[0] || null);
   } catch (err) {
     console.error(err);
