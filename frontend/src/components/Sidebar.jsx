@@ -30,12 +30,14 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform" aria-label="Sidebar">
-      <div className="flex flex-col h-full px-3 py-4 overflow-y-auto bg-gray-800">
+    <aside className="fixed top-0 left-0 z-40 h-screen w-64 overflow-hidden transition-transform lg:w-72" aria-label="Sidebar">
+      <div className="flex h-full flex-col overflow-x-hidden overflow-y-auto bg-gray-800 px-3 py-4">
         <div className="flex-grow">
-          <Link to="/" className="flex items-center gap-2 ps-2.5 mb-5">
-            <img src={logoImage} alt="Auth System Logo" className="h-8 w-8" />
-            <span className="self-center text-xl font-semibold whitespace-nowrap text-white">WeighBridge Monitoring System</span>
+          <Link to="/" className="mb-5 flex min-w-0 items-start gap-2 pe-1 ps-2.5">
+            <img src={logoImage} alt="Auth System Logo" className="h-8 w-8 shrink-0" />
+            <span className="min-w-0 self-center text-[clamp(0.82rem,0.9vw,1.15rem)] font-semibold leading-tight text-white [overflow-wrap:anywhere]">
+             WB Monitoring System
+            </span>
           </Link>
           <ul className="space-y-2 font-medium w-full">
             {navItems.map(item => {

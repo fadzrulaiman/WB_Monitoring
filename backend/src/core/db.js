@@ -47,6 +47,8 @@ const config = {
   server,
   database: process.env.DB_NAME,
   port: toNumber(process.env.DB_PORT, undefined),
+  connectionTimeout: toNumber(process.env.DB_CONNECTION_TIMEOUT_MS, 30000),
+  requestTimeout: toNumber(process.env.DB_REQUEST_TIMEOUT_MS, 60000),
   options: {
     encrypt: toBool(process.env.DB_ENCRYPT, true),
     trustServerCertificate: toBool(process.env.DB_TRUST_SERVER_CERT, false),

@@ -9,13 +9,15 @@ const SQLExecute = () => {
     const [query, setQuery] = useState("");
     const [result, setResult] = useState(null);
     const [error, setError] = useState("");
+    const [info, setInfo] = useState("");
     const [page, setPage] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [pendingUpdate, setPendingUpdate] = useState(null);
 
     if (!isSqlExecutorEnabled) {
         return (
             <div className="page-container">
-                <h2 style={{ color: "var(--primary)", marginBottom: 24 }}>SQL SELECT Executor</h2>
+                <h2 style={{ color: "var(--primary)", marginBottom: 24 }}>SQL Query Executor</h2>
                 <div className="message" style={{ color: "var(--danger)" }}>
                     This tool is disabled. Contact an administrator if you believe this is an error.
                 </div>
@@ -26,17 +28,44 @@ const SQLExecute = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        setInfo("");
         setResult(null);
         setPage(1);
         setIsLoading(true);
         try {
             const res = await axiosPrivate.post("sqlexecute", { query });
-            setResult(res.data);
+            const data = Array.isArray(res.data) ? res.data : [];
+            const pending = data[0]?.status === "PENDING_UPDATE" ? data[0] : null;
+            setPendingUpdate(pending);
+            setResult(data);
         } catch (err) {
             const apiError = err.response?.data;
             let msg = apiError?.error || apiError?.message || "Execution error";
             if (apiError?.details) {
                 msg += ": " + apiError.details;
+            }
+            setError(msg);
+            setPendingUpdate(null);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handlePendingAction = async (action) => {
+        setError("");
+        setInfo("");
+        setIsLoading(true);
+        try {
+            const endpoint = action === "rollback" ? "sqlexecute/rollback" : "sqlexecute/commit";
+            const res = await axiosPrivate.post(endpoint);
+            setInfo(res.data?.message || (action === "rollback" ? "Rolled back." : "Committed."));
+            setPendingUpdate(null);
+            setResult([{ rowsAffected: res.data?.rowsAffected ?? 0, action }]);
+        } catch (err) {
+            const apiError = err.response?.data;
+            let msg = apiError?.error || apiError?.message || `Failed to ${action}.`;
+            if (apiError?.details) {
+                msg += `: ${apiError.details}`;
             }
             setError(msg);
         } finally {
@@ -100,7 +129,7 @@ const SQLExecute = () => {
 
     return (
         <div className="page-container">
-            <h2 style={{ color: "var(--primary)", marginBottom: 24 }}>SQL SELECT Executor</h2>
+            <h2 style={{ color: "var(--primary)", marginBottom: 24 }}>SQL Query Executor</h2>
             <form className="search-form" onSubmit={handleSubmit}>
                 <label style={{ flex: 1 }}>
                     SQL Query
@@ -109,7 +138,7 @@ const SQLExecute = () => {
                         cols={60}
                         value={query}
                         onChange={e => setQuery(e.target.value)}
-                        placeholder="Enter SELECT query (e.g., SELECT * FROM WB_IN)"
+                        placeholder="Enter a single SELECT or UPDATE query"
                         required
                         style={{
                             fontFamily: "monospace",
@@ -137,6 +166,34 @@ const SQLExecute = () => {
             {isLoading && (
                 <div className="message" style={{ marginTop: 10 }}>
                     Running query...
+                </div>
+            )}
+            {pendingUpdate && (
+                <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                    <div className="message" style={{ marginBottom: 0 }}>
+                        UPDATE pending for {pendingUpdate.ttlSeconds}s. Commit or rollback.
+                    </div>
+                    <button
+                        type="button"
+                        className="btn"
+                        onClick={() => handlePendingAction("commit")}
+                        disabled={isLoading}
+                    >
+                        Commit
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={() => handlePendingAction("rollback")}
+                        disabled={isLoading}
+                    >
+                        Rollback
+                    </button>
+                </div>
+            )}
+            {info && (
+                <div className="message" style={{ marginTop: 10 }}>
+                    {info}
                 </div>
             )}
             {error && (

@@ -3,10 +3,10 @@ import Sidebar from './Sidebar';
 
 const Layout = () => {
   return (
-    <div className="flex">
+    <div className="min-h-screen overflow-x-hidden bg-gray-50">
       <Sidebar />
-      <main className="flex-1 ml-64 bg-gray-50 min-h-screen">
-        <div className="p-4">
+      <main className="min-h-screen min-w-0 pl-64 lg:pl-72">
+        <div className="overflow-x-hidden p-4">
           <Outlet />
         </div>
       </main>

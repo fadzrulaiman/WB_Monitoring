@@ -20,7 +20,7 @@ const app = express();
 const enableSqlExecutor = process.env.ENABLE_SQL_EXECUTOR === 'true';
 
 // Support comma-separated list of allowed frontend origins
-const rawOrigins = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:5173';
+const rawOrigins = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:5180';
 const allowedOrigins = rawOrigins.split(',').map(origin => origin.trim()).filter(Boolean);
 
 const corsOptions = {

@@ -96,7 +96,7 @@ npm run dev
 # Frontend (Vite)
 cd frontend
 npm run dev
-# -> http://localhost:5173
+# -> http://localhost:5180
 ```
 
 The frontend uses `VITE_API_BASE_URL` or `VITE_API_PORT` (see `frontend/src/api/axios.js`) to reach the backend.
